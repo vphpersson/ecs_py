@@ -163,4 +163,5 @@ class Base:
     event: Optional[Event] = None
     host: Optional[Host] = None
     log: Optional[Log] = None
+    process: Optional[Process] = None
     message: Optional[str] = None
