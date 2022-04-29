@@ -141,8 +141,8 @@ class LogOriginFile:
 
 @dataclass
 class LogOrigin:
-    file: LogOriginFile
-    function: str
+    file: Optional[LogOriginFile] = None
+    function: Optional[str] = None
 
 
 @dataclass
