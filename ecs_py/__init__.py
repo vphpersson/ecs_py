@@ -155,3 +155,12 @@ class Log:
     level: Optional[str] = None
     logger: Optional[str] = None
     origin: Optional[LogOrigin] = None
+
+
+@dataclass
+class Base:
+    error: Optional[Error] = None
+    event: Optional[Event] = None
+    host: Optional[Host] = None
+    log: Optional[Log] = None
+    message: Optional[str] = None
