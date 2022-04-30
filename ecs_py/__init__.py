@@ -9,11 +9,13 @@ from abc import ABC
 @dataclass
 class ECSEntry(ABC):
 
-    def get_field_value(self, field_name: str) -> Any:
+    def get_field_value(self, field_name: str, create_namespaces: bool = False) -> Any:
         """
         Retrieve the value corresponding to the provided field name.
 
         :param field_name: A field name whose value to retrieve.
+        :param create_namespaces: Whether to create the namespace that does not already exist when resolving the field
+            name.
         :return: The value corresponding to the provided field name.
         """
 
@@ -27,11 +29,23 @@ class ECSEntry(ABC):
             raise ValueError(f'{self} does not have the field "{current_field_name}"')
 
         if (field_value := getattr(self, current_field_name)) is None:
-            return None
+            field_type = self.__annotations__[current_field_name].__args__[0]
+            if issubclass(field_type, ECSEntry) and create_namespaces:
+                created_namespace = field_type()
+                setattr(self, current_field_name, created_namespace)
+
+                return (
+                    created_namespace.get_field_value(field_name=remaining_field_name)
+                    if remaining_field_name else created_namespace
+                )
+            else:
+                return None
         elif isinstance(field_value, ECSEntry) and remaining_field_name != '':
             return field_value.get_field_value(field_name=remaining_field_name)
         else:
             return field_value
+
+    # TODO: What gets called when one runs `dict` on an object? Use that instead?
 
     def to_dict(self) -> dict[str, Any]:
         """
