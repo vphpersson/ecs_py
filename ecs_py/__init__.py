@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, fields
 from typing import Optional, Literal, Any
 from shlex import join as shlex_join
@@ -29,7 +30,13 @@ class ECSEntry(ABC):
             raise ValueError(f'{self} does not have the field "{current_field_name}"')
 
         if (field_value := getattr(self, current_field_name)) is None:
-            field_type = self.__annotations__[current_field_name].__args__[0]
+
+            field_type_annotation = self.__annotations__[current_field_name]
+            if isinstance(field_type_annotation, str):
+                field_type_annotation = eval(field_type_annotation)
+
+            field_type = field_type_annotation.__args__[0]
+
             if issubclass(field_type, ECSEntry) and create_namespaces:
                 created_namespace = field_type()
                 setattr(self, current_field_name, created_namespace)
@@ -114,6 +121,29 @@ class ProcessThread(ECSEntry):
 
 
 @dataclass
+class Group(ECSEntry):
+    domain: Optional[str] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
+    effective: Optional[Group] = None
+
+
+@dataclass
+class User(ECSEntry):
+    domain: Optional[str] = None
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    hash: Optional[str] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
+    roles: Optional[list[str]] = None
+    changes: Optional[User] = None
+    effective: Optional[User] = None
+    group: Optional[Group] = None
+    target: Optional[User] = None
+
+
+@dataclass
 class Process(ECSEntry):
     args: Optional[list[str]] = None
     arg_count: Optional[int] = None
@@ -130,10 +160,15 @@ class Process(ECSEntry):
     title: Optional[str] = None
     uptime: Optional[int] = None
     working_directory: Optional[str] = None
+    parent: Optional[Process] = None
+    # NOTE: Custom.
+    user: Optional[User] = None
+    # NOTE: Custom.
+    group: Optional[Group] = None
+
     # code_signature.*
     # elf.*
     # hash.*
-    # parent.*
     # pe.*
 
     def __post_init__(self):
@@ -225,7 +260,9 @@ class Log(ECSEntry):
 class Base(ECSEntry):
     error: Optional[Error] = None
     event: Optional[Event] = None
+    group: Optional[Group] = None
     host: Optional[Host] = None
     log: Optional[Log] = None
     process: Optional[Process] = None
+    user: Optional[User] = None
     message: Optional[str] = None
