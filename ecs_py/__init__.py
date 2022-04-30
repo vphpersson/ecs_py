@@ -1,12 +1,62 @@
-from dataclasses import dataclass
-from typing import Optional, Literal
+from dataclasses import dataclass, fields
+from typing import Optional, Literal, Any
 from shlex import join as shlex_join
 from pathlib import PurePath
 from datetime import datetime
+from abc import ABC
 
 
 @dataclass
-class Error:
+class ECSEntry(ABC):
+
+    def get_field_value(self, field_name: str) -> Any:
+        """
+        Retrieve the value corresponding to the provided field name.
+
+        :param field_name: A field name whose value to retrieve.
+        :return: The value corresponding to the provided field name.
+        """
+
+        if '.' in field_name:
+            current_field_name, remaining_field_name = field_name.split(sep='.', maxsplit=1)
+        else:
+            current_field_name = field_name
+            remaining_field_name = ''
+
+        if not hasattr(self, current_field_name):
+            raise ValueError(f'{self} does not have the field "{current_field_name}"')
+
+        if (field_value := getattr(self, current_field_name)) is None:
+            return None
+        elif isinstance(field_value, ECSEntry) and remaining_field_name != '':
+            return field_value.get_field_value(field_name=remaining_field_name)
+        else:
+            return field_value
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Produce a `dict` from the ECS entry, removing fields with `None` as value.
+
+        :return: A `dict` representation of ECS entry.
+        """
+
+        entry_dict: dict[str, Any] = dict()
+
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+
+            if isinstance(field_value, ECSEntry):
+                if field_value_dict := field_value.to_dict():
+                    entry_dict[field.name] = field_value_dict
+            else:
+                if field_value is not None:
+                    entry_dict[field.name] = field_value
+
+        return entry_dict
+
+
+@dataclass
+class Error(ECSEntry):
     code: Optional[str] = None
     message: Optional[str] = None
     id: Optional[str] = None
@@ -15,7 +65,7 @@ class Error:
 
 
 @dataclass
-class OS:
+class OS(ECSEntry):
     family: Optional[str] = None
     full: Optional[str] = None
     kernel: Optional[str] = None
@@ -26,7 +76,7 @@ class OS:
 
 
 @dataclass
-class Host:
+class Host(ECSEntry):
     architecture: Optional[str] = None
     # cpu.*
     # disk.*
@@ -44,13 +94,13 @@ class Host:
 
 
 @dataclass
-class ProcessThread:
+class ProcessThread(ECSEntry):
     id: Optional[int] = None
     name: Optional[str] = None
 
 
 @dataclass
-class Process:
+class Process(ECSEntry):
     args: Optional[list[str]] = None
     arg_count: Optional[int] = None
     command_line: Optional[str] = None
@@ -84,7 +134,7 @@ class Process:
 
 
 @dataclass
-class Event:
+class Event(ECSEntry):
     action: Optional[str] = None
     agent_id_status: Optional[str] = None
     category: Optional[list[str]] = None
@@ -114,51 +164,51 @@ class Event:
 
 
 @dataclass
-class LogSyslogSeverity:
+class LogSyslogSeverity(ECSEntry):
     code: Optional[int] = None
     name: Optional[str] = None
 
 
 @dataclass
-class LogSyslogFacility:
+class LogSyslogFacility(ECSEntry):
     code: Optional[int] = None
     name: Optional[str] = None
 
 
 @dataclass
-class LogSyslog:
+class LogSyslog(ECSEntry):
     facility: Optional[LogSyslogFacility] = None
     priority: Optional[int] = None
     severity: Optional[LogSyslogSeverity] = None
 
 
 @dataclass
-class LogOriginFile:
+class LogOriginFile(ECSEntry):
     path: Optional[str] = None
     name: Optional[str] = None
     line: Optional[int] = None
 
 
 @dataclass
-class LogOrigin:
+class LogOrigin(ECSEntry):
     file: Optional[LogOriginFile] = None
     function: Optional[str] = None
 
 
 @dataclass
-class LogFile:
+class LogFile(ECSEntry):
     path: Optional[str] = None
 
 
 @dataclass
-class Log:
+class Log(ECSEntry):
     level: Optional[str] = None
     logger: Optional[str] = None
     origin: Optional[LogOrigin] = None
 
 
 @dataclass
-class Base:
+class Base(ECSEntry):
     error: Optional[Error] = None
     event: Optional[Event] = None
     host: Optional[Host] = None
