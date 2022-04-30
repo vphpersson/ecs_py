@@ -1,10 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields
-from typing import Optional, Literal, Any
+from typing import Optional, Literal, Any, Final
 from shlex import join as shlex_join
 from pathlib import PurePath
 from datetime import datetime
 from abc import ABC
+from re import compile as re_compile, Pattern as RePattern
+
+
+_OPTIONAL_TYPE_PATTERN: Final[RePattern] = re_compile(pattern=r'^Optional\[([^]]+)\]$')
 
 
 @dataclass
@@ -30,12 +34,7 @@ class ECSEntry(ABC):
             raise ValueError(f'{self} does not have the field "{current_field_name}"')
 
         if (field_value := getattr(self, current_field_name)) is None:
-
-            field_type_annotation = self.__annotations__[current_field_name]
-            if isinstance(field_type_annotation, str):
-                field_type_annotation = eval(field_type_annotation)
-
-            field_type = field_type_annotation.__args__[0]
+            field_type = globals()[_OPTIONAL_TYPE_PATTERN.sub(repl=r'\1', string=self.__annotations__[current_field_name])]
 
             if issubclass(field_type, ECSEntry) and create_namespaces:
                 created_namespace = field_type()
@@ -125,6 +124,7 @@ class Group(ECSEntry):
     domain: Optional[str] = None
     id: Optional[str] = None
     name: Optional[str] = None
+    # NOTE: Custom.
     effective: Optional[Group] = None
 
 
