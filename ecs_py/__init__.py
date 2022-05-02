@@ -399,5 +399,6 @@ class Base(ECSEntry):
     log: Optional[Log] = None
     process: Optional[Process] = None
     source: Optional[Source] = None
+    url: Optional[URL] = None
     user: Optional[User] = None
     message: Optional[str] = None
