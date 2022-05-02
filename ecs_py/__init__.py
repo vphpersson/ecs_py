@@ -51,8 +51,6 @@ class ECSEntry(ABC):
         else:
             return field_value
 
-    # TODO: What gets called when one runs `dict` on an object? Use that instead?
-
     def to_dict(self) -> dict[str, Any]:
         """
         Produce a `dict` from the ECS entry, removing fields with `None` as value.
@@ -257,12 +255,131 @@ class Log(ECSEntry):
 
 
 @dataclass
+class DestinationNat(ECSEntry):
+    ip: Optional[str] = None
+    port: Optional[str] = None
+
+
+@dataclass
+class Destination(ECSEntry):
+    address: Optional[str] = None
+    bytes: Optional[int] = None
+    domain: Optional[str] = None
+    ip: Optional[str] = None
+    mac: Optional[str] = None
+    # nat.*
+    packets: Optional[int] = None
+    port: Optional[int] = None
+    registered_domain: Optional[str] = None
+    subdomain: Optional[str] = None
+    top_level_domain: Optional[str] = None
+    # as.*
+    # geo.*
+    user: Optional[User] = None
+
+
+@dataclass
+class SourceNat(ECSEntry):
+    ip: Optional[str] = None
+    port: Optional[str] = None
+
+
+@dataclass
+class Source(ECSEntry):
+    address: Optional[str] = None
+    bytes: Optional[int] = None
+    domain: Optional[str] = None
+    ip: Optional[str] = None
+    mac: Optional[str] = None
+    # nat.*
+    packets: Optional[int] = None
+    port: Optional[int] = None
+    registered_domain: Optional[str] = None
+    subdomain: Optional[str] = None
+    top_level_domain: Optional[str] = None
+    # as.*
+    # geo.*
+    user: Optional[User] = None
+
+
+@dataclass
+class HttpRequestBody(ECSEntry):
+    bytes: Optional[int] = None
+    content: Optional[str] = None
+
+
+@dataclass
+class HttpRequest(ECSEntry):
+    body: Optional[HttpRequestBody] = None
+    bytes: Optional[int] = None
+    id: Optional[str] = None
+    method: Optional[str] = None
+    mime_type: Optional[str] = None
+    referrer: Optional[str] = None
+
+
+@dataclass
+class HttpResponseBody(ECSEntry):
+    bytes: Optional[int] = None
+    content: Optional[str] = None
+
+
+@dataclass
+class HttpResponse(ECSEntry):
+    body: Optional[HttpResponseBody] = None
+    bytes: Optional[int] = None
+    mime_type: Optional[str] = None
+    status_code: Optional[int] = None
+
+
+@dataclass
+class Http(ECSEntry):
+    request: Optional[HttpRequest] = None
+    response: Optional[HttpResponse] = None
+    version: Optional[str] = None
+
+
+@dataclass
+class UserAgentDevice(ECSEntry):
+    name: Optional[str] = None
+
+
+@dataclass
+class UserAgent(ECSEntry):
+    name: Optional[str] = None
+    original: Optional[str] = None
+    version: Optional[str] = None
+    os: Optional[OS] = None
+
+
+@dataclass
+class Network(ECSEntry):
+    application: Optional[str] = None
+    bytes: Optional[int] = None
+    community_id: Optional[str] = None
+    direction: Optional[Literal['ingress', 'egress', 'inbound', 'outbound', 'internal', 'external', 'unknown']] = None
+    forwarded_ip: Optional[str] = None
+    iana_number: Optional[str] = None
+    # inner
+    name: Optional[str] = None
+    packets: Optional[int] = None
+    protocol: Optional[str] = None
+    transport: Optional[str] = None
+    type: Optional[str] = None
+    # inner.vlan.*
+    # vlan.*
+
+
+@dataclass
 class Base(ECSEntry):
     error: Optional[Error] = None
     event: Optional[Event] = None
+    destination: Optional[Destination] = None
     group: Optional[Group] = None
     host: Optional[Host] = None
+    http: Optional[Http] = None
     log: Optional[Log] = None
     process: Optional[Process] = None
+    source: Optional[Source] = None
     user: Optional[User] = None
     message: Optional[str] = None
