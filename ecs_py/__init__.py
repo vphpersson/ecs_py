@@ -389,7 +389,44 @@ class URL(ECSEntry):
 
 
 @dataclass
+class Client(ECSEntry):
+    address: Optional[str] = None
+    bytes: Optional[int] = None
+    domain: Optional[str] = None
+    ip: Optional[str] = None
+    mac: Optional[str] = None
+    # nat.*
+    packets: Optional[int] = None
+    port: Optional[int] = None
+    registered_domain: Optional[str] = None
+    subdomain: Optional[str] = None
+    top_level_domain: Optional[str] = None
+    # as.*
+    # geo.*
+    user: Optional[User] = None
+
+
+@dataclass
+class Server(ECSEntry):
+    address: Optional[str] = None
+    bytes: Optional[int] = None
+    domain: Optional[str] = None
+    ip: Optional[str] = None
+    mac: Optional[str] = None
+    # nat.*
+    packets: Optional[int] = None
+    port: Optional[int] = None
+    registered_domain: Optional[str] = None
+    subdomain: Optional[str] = None
+    top_level_domain: Optional[str] = None
+    # as.*
+    # geo.*
+    user: Optional[User] = None
+
+
+@dataclass
 class Base(ECSEntry):
+    client: Optional[Client] = None
     error: Optional[Error] = None
     event: Optional[Event] = None
     destination: Optional[Destination] = None
@@ -398,6 +435,7 @@ class Base(ECSEntry):
     http: Optional[Http] = None
     log: Optional[Log] = None
     process: Optional[Process] = None
+    server: Optional[Server] = None
     source: Optional[Source] = None
     url: Optional[URL] = None
     user: Optional[User] = None
