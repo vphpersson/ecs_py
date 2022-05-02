@@ -434,9 +434,11 @@ class Base(ECSEntry):
     host: Optional[Host] = None
     http: Optional[Http] = None
     log: Optional[Log] = None
+    network: Optional[Network] = None
     process: Optional[Process] = None
     server: Optional[Server] = None
     source: Optional[Source] = None
     url: Optional[URL] = None
     user: Optional[User] = None
+    user_agent: Optional[UserAgent] = None
     message: Optional[str] = None
