@@ -311,10 +311,14 @@ class HttpRequestBody(ECSEntry):
 @dataclass
 class HttpRequest(ECSEntry):
     body: Optional[HttpRequestBody] = None
+    # Custom
+    headers: Optional[dict[str, str]] = None
     bytes: Optional[int] = None
     id: Optional[str] = None
     method: Optional[str] = None
     mime_type: Optional[str] = None
+    # Custom
+    content_type_mime_type: Optional[str] = None
     referrer: Optional[str] = None
 
 
@@ -327,8 +331,11 @@ class HttpResponseBody(ECSEntry):
 @dataclass
 class HttpResponse(ECSEntry):
     body: Optional[HttpResponseBody] = None
+    # Custom
+    headers: Optional[dict[str, str]] = None
     bytes: Optional[int] = None
     mime_type: Optional[str] = None
+    content_type_mime_type: Optional[str] = None
     status_code: Optional[int] = None
 
 
@@ -386,6 +393,9 @@ class URL(ECSEntry):
     subdomain: Optional[str] = None
     top_level_domain: Optional[str] = None
     username: Optional[str] = None
+    # Custom
+    query_keys: Optional[list[str]] = None
+    query_values: Optional[list[str]] = None
 
 
 @dataclass
