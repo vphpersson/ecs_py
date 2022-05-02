@@ -371,6 +371,24 @@ class Network(ECSEntry):
 
 
 @dataclass
+class URL(ECSEntry):
+    domain: Optional[str] = None
+    extension: Optional[str] = None
+    fragment: Optional[str] = None
+    full: Optional[str] = None
+    original: Optional[str] = None
+    password: Optional[str] = None
+    path: Optional[str] = None
+    port: Optional[int] = None
+    query: Optional[str] = None
+    registered_domain: Optional[str] = None
+    scheme: Optional[str] = None
+    subdomain: Optional[str] = None
+    top_level_domain: Optional[str] = None
+    username: Optional[str] = None
+
+
+@dataclass
 class Base(ECSEntry):
     error: Optional[Error] = None
     event: Optional[Event] = None
