@@ -337,7 +337,8 @@ class HttpResponse(ECSEntry):
     headers: Optional[dict[str, str]] = None
     bytes: Optional[int] = None
     mime_type: Optional[str] = None
-    content_type_mime_type: Optional[str] = None
+    # Custom
+    content_type_mime_type: Optional[list[str]] = None
     status_code: Optional[int] = None
 
 
