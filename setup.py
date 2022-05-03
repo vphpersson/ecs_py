@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ecs_py',
-    version='0.30',
+    version='0.31',
     packages=find_packages(),
     install_requires=[]
 )
