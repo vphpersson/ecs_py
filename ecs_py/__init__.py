@@ -306,6 +306,8 @@ class Source(ECSEntry):
 class HttpRequestBody(ECSEntry):
     bytes: Optional[int] = None
     content: Optional[str] = None
+    # Custom
+    decompressed_content: Optional[str] = None
 
 
 @dataclass
@@ -318,7 +320,7 @@ class HttpRequest(ECSEntry):
     method: Optional[str] = None
     mime_type: Optional[str] = None
     # Custom
-    content_type_mime_type: Optional[str] = None
+    content_type_mime_type: Optional[list[str]] = None
     referrer: Optional[str] = None
 
 
