@@ -303,7 +303,7 @@ class Source(ECSEntry):
 
 
 @dataclass
-class HttpRequestBody(ECSEntry):
+class HttpBody(ECSEntry):
     bytes: Optional[int] = None
     content: Optional[str] = None
     # Custom
@@ -312,33 +312,27 @@ class HttpRequestBody(ECSEntry):
 
 @dataclass
 class HttpRequest(ECSEntry):
-    body: Optional[HttpRequestBody] = None
+    body: Optional[HttpBody] = None
     # Custom
-    headers: Optional[dict[str, str]] = None
+    headers: Optional[dict[str, list[str]]] = None
     bytes: Optional[int] = None
     id: Optional[str] = None
     method: Optional[str] = None
     mime_type: Optional[str] = None
     # Custom
-    content_type_mime_type: Optional[list[str]] = None
+    content_type: Optional[list[str]] = None
     referrer: Optional[str] = None
 
 
 @dataclass
-class HttpResponseBody(ECSEntry):
-    bytes: Optional[int] = None
-    content: Optional[str] = None
-
-
-@dataclass
 class HttpResponse(ECSEntry):
-    body: Optional[HttpResponseBody] = None
+    body: Optional[HttpBody] = None
     # Custom
     headers: Optional[dict[str, str]] = None
     bytes: Optional[int] = None
     mime_type: Optional[str] = None
     # Custom
-    content_type_mime_type: Optional[list[str]] = None
+    content_type: Optional[list[str]] = None
     status_code: Optional[int] = None
 
 
