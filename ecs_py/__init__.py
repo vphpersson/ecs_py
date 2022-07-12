@@ -334,6 +334,8 @@ class HttpResponse(ECSEntry):
     # Custom
     content_type: Optional[list[str]] = None
     status_code: Optional[int] = None
+    # Custom
+    reason_phrase: Optional[str] = None
 
 
 @dataclass
