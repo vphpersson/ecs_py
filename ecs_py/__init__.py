@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields
-from typing import Optional, Literal, Any, Final
+from typing import Literal, Any, Final
 from shlex import join as shlex_join
 from pathlib import PurePath
 from datetime import datetime
@@ -68,101 +68,140 @@ class ECSEntry(ABC):
                     entry_dict[field.name] = field_value_dict
             else:
                 if field_value is not None:
-                    entry_dict[field.name] = field_value
+                    # NOTE: Override for reserved field names.
+                    dict_field_name: str
+                    match field.name:
+                        case 'class_':
+                            dict_field_name = 'class'
+                        case _:
+                            dict_field_name = field.name
+
+                    entry_dict[dict_field_name] = field_value
 
         return entry_dict
 
 
 @dataclass
 class Error(ECSEntry):
-    code: Optional[str] = None
-    message: Optional[str] = None
-    id: Optional[str] = None
-    stack_trace: Optional[str] = None
-    type: Optional[str] = None
+    code: str | None = None
+    message: str | None = None
+    id: str | None = None
+    stack_trace: str | None = None
+    type: str | None = None
+
+
+@dataclass
+class DNSAnswer(ECSEntry):
+    class_: str | None = None
+    data: str | None = None
+    name: str | None = None
+    ttl: int | None = None
+    type: str | None = None
+
+
+@dataclass
+class DNSQuestion(ECSEntry):
+    class_: str | None = None
+    name: str | None = None
+    registered_domain: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
+    type: str | None = None
+
+
+@dataclass
+class DNS(ECSEntry):
+    answers: list[DNSAnswer] | None = None
+    header_flags: list[str] | None = None
+    id: str | None = None
+    op_code: str | None = None
+    question: DNSQuestion | None = None
+    resolved_ip: list[str] | None = None
+    response_code: str | None = None
+    type: str | None = None
 
 
 @dataclass
 class OS(ECSEntry):
-    family: Optional[str] = None
-    full: Optional[str] = None
-    kernel: Optional[str] = None
-    name: Optional[str] = None
-    platform: Optional[str] = None
-    type: Optional[Literal['linux', 'macos', 'unix', 'windows']] = None
-    version: Optional[str] = None
+    family: str | None = None
+    full: str | None = None
+    kernel: str | None = None
+    name: str | None = None
+    platform: str | None = None
+    type: Literal['linux', 'macos', 'unix', 'windows'] | None = None
+    version: str | None = None
 
 
 @dataclass
 class Host(ECSEntry):
-    architecture: Optional[str] = None
+    architecture: str | None = None
     # cpu.*
     # disk.*
-    domain: Optional[str] = None
+    domain: str | None = None
     # geo.*
-    hostname: Optional[str] = None
-    id: Optional[str] = None
-    ip: Optional[list[str]] = None
-    mac: Optional[list[str]] = None
-    name: Optional[str] = None
+    hostname: str | None = None
+    id: str | None = None
+    ip: list[str | None] = None
+    mac: list[str | None] = None
+    name: str | None = None
     # network.*
-    type: Optional[str] = None
-    uptime: Optional[int] = None
-    os: Optional[OS] = None
+    type: str | None = None
+    uptime: int | None = None
+    os: OS | None = None
 
 
 @dataclass
 class ProcessThread(ECSEntry):
-    id: Optional[int] = None
-    name: Optional[str] = None
+    id: int | None = None
+    name: str | None = None
 
 
 @dataclass
 class Group(ECSEntry):
-    domain: Optional[str] = None
-    id: Optional[str] = None
-    name: Optional[str] = None
+    domain: str | None = None
+    id: str | None = None
+    name: str | None = None
     # NOTE: Custom.
-    effective: Optional[Group] = None
+    effective: Group | None = None
 
 
 @dataclass
 class User(ECSEntry):
-    domain: Optional[str] = None
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    hash: Optional[str] = None
-    id: Optional[str] = None
-    name: Optional[str] = None
-    roles: Optional[list[str]] = None
-    changes: Optional[User] = None
-    effective: Optional[User] = None
-    group: Optional[Group] = None
-    target: Optional[User] = None
+    domain: str | None = None
+    email: str | None = None
+    full_name: str | None = None
+    hash: str | None = None
+    id: str | None = None
+    name: str | None = None
+    roles: list[str | None] = None
+    changes: User | None = None
+    effective: User | None = None
+    group: Group | None = None
+    target: User | None = None
 
 
 @dataclass
 class Process(ECSEntry):
-    args: Optional[list[str]] = None
-    arg_count: Optional[int] = None
-    command_line: Optional[str] = None
-    end: Optional[datetime] = None
-    entity_id: Optional[str] = None
-    executable: Optional[str] = None
-    exit_code: Optional[int] = None
-    name: Optional[str] = None
-    pgid: Optional[int] = None
-    pid: Optional[int] = None
-    start: Optional[datetime] = None
-    thread: Optional[ProcessThread] = None
-    title: Optional[str] = None
-    uptime: Optional[int] = None
-    working_directory: Optional[str] = None
-    parent: Optional[Process] = None
+    args: list[str | None] = None
+    arg_count: int | None = None
+    command_line: str | None = None
+    end: datetime | None = None
+    entity_id: str | None = None
+    executable: str | None = None
+    exit_code: int | None = None
+    name: str | None = None
+    pgid: int | None = None
+    pid: int | None = None
+    start: datetime | None = None
+    thread: ProcessThread | None = None
+    title: str | None = None
+    uptime: int | None = None
+    working_directory: str | None = None
+    parent: Process | None = None
     # NOTE: Custom.
-    user: Optional[User] = None
+    user: User | None = None
     # NOTE: Custom.
-    group: Optional[Group] = None
+    group: Group | None = None
 
     # code_signature.*
     # elf.*
@@ -182,272 +221,272 @@ class Process(ECSEntry):
 
 @dataclass
 class Event(ECSEntry):
-    action: Optional[str] = None
-    agent_id_status: Optional[str] = None
-    category: Optional[list[str]] = None
-    code: Optional[str] = None
-    created: Optional[datetime] = None
-    dataset: Optional[str] = None
-    duration: Optional[int] = None
-    end: Optional[datetime] = None
-    hash: Optional[str] = None
-    id: Optional[str] = None
-    ingested: Optional[datetime] = None
-    kind: Optional[Literal['alert', 'enrichment', 'event', 'metric', 'state', 'pipeline_error', 'signal']] = None
-    module: Optional[str] = None
-    original: Optional[str] = None
-    outcome: Optional[Literal['failure', 'success', 'unknown']] = None
-    provider: Optional[str] = None
-    reason: Optional[str] = None
-    reference: Optional[str] = None
-    risk_score: Optional[float] = None
-    risk_score_norm: Optional[float] = None
-    sequence: Optional[int] = None
-    severity: Optional[str] = None
-    start: Optional[datetime] = None
-    timezone: Optional[str] = None
-    type: Optional[list[str]] = None
-    url: Optional[str] = None
+    action: str | None = None
+    agent_id_status: str | None = None
+    category: list[str | None] = None
+    code: str | None = None
+    created: datetime | None = None
+    dataset: str | None = None
+    duration: int | None = None
+    end: datetime | None = None
+    hash: str | None = None
+    id: str | None = None
+    ingested: datetime | None = None
+    kind: Literal['alert', 'enrichment', 'event', 'metric', 'state', 'pipeline_error', 'signal'] | None = None
+    module: str | None = None
+    original: str | None = None
+    outcome: Literal['failure', 'success', 'unknown'] | None = None
+    provider: str | None = None
+    reason: str | None = None
+    reference: str | None = None
+    risk_score: float | None = None
+    risk_score_norm: float | None = None
+    sequence: int | None = None
+    severity: str | None = None
+    start: datetime | None = None
+    timezone: str | None = None
+    type: list[str | None] = None
+    url: str | None = None
 
 
 @dataclass
 class LogSyslogSeverity(ECSEntry):
-    code: Optional[int] = None
-    name: Optional[str] = None
+    code: int | None = None
+    name: str | None = None
 
 
 @dataclass
 class LogSyslogFacility(ECSEntry):
-    code: Optional[int] = None
-    name: Optional[str] = None
+    code: int | None = None
+    name: str | None = None
 
 
 @dataclass
 class LogSyslog(ECSEntry):
-    facility: Optional[LogSyslogFacility] = None
-    priority: Optional[int] = None
-    severity: Optional[LogSyslogSeverity] = None
+    facility: LogSyslogFacility | None = None
+    priority: int | None = None
+    severity: LogSyslogSeverity | None = None
 
 
 @dataclass
 class LogOriginFile(ECSEntry):
-    path: Optional[str] = None
-    name: Optional[str] = None
-    line: Optional[int] = None
+    path: str | None = None
+    name: str | None = None
+    line: int | None = None
 
 
 @dataclass
 class LogOrigin(ECSEntry):
-    file: Optional[LogOriginFile] = None
-    function: Optional[str] = None
+    file: LogOriginFile | None = None
+    function: str | None = None
 
 
 @dataclass
 class LogFile(ECSEntry):
-    path: Optional[str] = None
+    path: str | None = None
 
 
 @dataclass
 class Log(ECSEntry):
-    level: Optional[str] = None
-    logger: Optional[str] = None
-    origin: Optional[LogOrigin] = None
+    level: str | None = None
+    logger: str | None = None
+    origin: LogOrigin | None = None
 
 
 @dataclass
 class DestinationNat(ECSEntry):
-    ip: Optional[str] = None
-    port: Optional[str] = None
+    ip: str | None = None
+    port: str | None = None
 
 
 @dataclass
 class Destination(ECSEntry):
-    address: Optional[str] = None
-    bytes: Optional[int] = None
-    domain: Optional[str] = None
-    ip: Optional[str] = None
-    mac: Optional[str] = None
+    address: str | None = None
+    bytes: int | None = None
+    domain: str | None = None
+    ip: str | None = None
+    mac: str | None = None
     # nat.*
-    packets: Optional[int] = None
-    port: Optional[int] = None
-    registered_domain: Optional[str] = None
-    subdomain: Optional[str] = None
-    top_level_domain: Optional[str] = None
+    packets: int | None = None
+    port: int | None = None
+    registered_domain: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
     # as.*
     # geo.*
-    user: Optional[User] = None
+    user: User | None = None
 
 
 @dataclass
 class SourceNat(ECSEntry):
-    ip: Optional[str] = None
-    port: Optional[str] = None
+    ip: str | None = None
+    port: str | None = None
 
 
 @dataclass
 class Source(ECSEntry):
-    address: Optional[str] = None
-    bytes: Optional[int] = None
-    domain: Optional[str] = None
-    ip: Optional[str] = None
-    mac: Optional[str] = None
+    address: str | None = None
+    bytes: int | None = None
+    domain: str | None = None
+    ip: str | None = None
+    mac: str | None = None
     # nat.*
-    packets: Optional[int] = None
-    port: Optional[int] = None
-    registered_domain: Optional[str] = None
-    subdomain: Optional[str] = None
-    top_level_domain: Optional[str] = None
+    packets: int | None = None
+    port: int | None = None
+    registered_domain: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
     # as.*
     # geo.*
-    user: Optional[User] = None
+    user: User | None = None
 
 
 @dataclass
 class HttpBody(ECSEntry):
-    bytes: Optional[int] = None
-    content: Optional[str] = None
+    bytes: int | None = None
+    content: str | None = None
     # Custom
-    decompressed_content: Optional[str] = None
+    decompressed_content: str | None = None
 
 
 @dataclass
 class HttpRequest(ECSEntry):
-    body: Optional[HttpBody] = None
+    body: HttpBody | None = None
     # Custom
-    headers: Optional[dict[str, list[str]]] = None
-    bytes: Optional[int] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    mime_type: Optional[str] = None
+    headers: dict[str, list[str | None]] = None
+    bytes: int | None = None
+    id: str | None = None
+    method: str | None = None
+    mime_type: str | None = None
     # Custom
-    content_type: Optional[list[str]] = None
-    referrer: Optional[str] = None
+    content_type: list[str | None] = None
+    referrer: str | None = None
 
 
 @dataclass
 class HttpResponse(ECSEntry):
-    body: Optional[HttpBody] = None
+    body: HttpBody | None = None
     # Custom
-    headers: Optional[dict[str, str]] = None
-    bytes: Optional[int] = None
-    mime_type: Optional[str] = None
+    headers: dict[str, str | None] = None
+    bytes: int | None = None
+    mime_type: str | None = None
     # Custom
-    content_type: Optional[list[str]] = None
-    status_code: Optional[int] = None
+    content_type: list[str | None] = None
+    status_code: int | None = None
     # Custom
-    reason_phrase: Optional[str] = None
+    reason_phrase: str | None = None
 
 
 @dataclass
 class Http(ECSEntry):
-    request: Optional[HttpRequest] = None
-    response: Optional[HttpResponse] = None
-    version: Optional[str] = None
+    request: HttpRequest | None = None
+    response: HttpResponse | None = None
+    version: str | None = None
 
 
 @dataclass
 class UserAgentDevice(ECSEntry):
-    name: Optional[str] = None
+    name: str | None = None
 
 
 @dataclass
 class UserAgent(ECSEntry):
-    name: Optional[str] = None
-    original: Optional[str] = None
-    version: Optional[str] = None
-    os: Optional[OS] = None
+    name: str | None = None
+    original: str | None = None
+    version: str | None = None
+    os: OS | None = None
 
 
 @dataclass
 class Network(ECSEntry):
-    application: Optional[str] = None
-    bytes: Optional[int] = None
-    community_id: Optional[str] = None
-    direction: Optional[Literal['ingress', 'egress', 'inbound', 'outbound', 'internal', 'external', 'unknown']] = None
-    forwarded_ip: Optional[str] = None
-    iana_number: Optional[str] = None
+    application: str | None = None
+    bytes: int | None = None
+    community_id: str | None = None
+    direction: Literal['ingress', 'egress', 'inbound', 'outbound', 'internal', 'external', 'unknown'] | None = None
+    forwarded_ip: str | None = None
+    iana_number: str | None = None
     # inner
-    name: Optional[str] = None
-    packets: Optional[int] = None
-    protocol: Optional[str] = None
-    transport: Optional[str] = None
-    type: Optional[str] = None
+    name: str | None = None
+    packets: int | None = None
+    protocol: str | None = None
+    transport: str | None = None
+    type: str | None = None
     # inner.vlan.*
     # vlan.*
 
 
 @dataclass
 class URL(ECSEntry):
-    domain: Optional[str] = None
-    extension: Optional[str] = None
-    fragment: Optional[str] = None
-    full: Optional[str] = None
-    original: Optional[str] = None
-    password: Optional[str] = None
-    path: Optional[str] = None
-    port: Optional[int] = None
-    query: Optional[str] = None
-    registered_domain: Optional[str] = None
-    scheme: Optional[str] = None
-    subdomain: Optional[str] = None
-    top_level_domain: Optional[str] = None
-    username: Optional[str] = None
+    domain: str | None = None
+    extension: str | None = None
+    fragment: str | None = None
+    full: str | None = None
+    original: str | None = None
+    password: str | None = None
+    path: str | None = None
+    port: int | None = None
+    query: str | None = None
+    registered_domain: str | None = None
+    scheme: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
+    username: str | None = None
     # Custom
-    query_keys: Optional[list[str]] = None
-    query_values: Optional[list[str]] = None
+    query_keys: list[str | None] = None
+    query_values: list[str | None] = None
 
 
 @dataclass
 class Client(ECSEntry):
-    address: Optional[str] = None
-    bytes: Optional[int] = None
-    domain: Optional[str] = None
-    ip: Optional[str] = None
-    mac: Optional[str] = None
+    address: str | None = None
+    bytes: int | None = None
+    domain: str | None = None
+    ip: str | None = None
+    mac: str | None = None
     # nat.*
-    packets: Optional[int] = None
-    port: Optional[int] = None
-    registered_domain: Optional[str] = None
-    subdomain: Optional[str] = None
-    top_level_domain: Optional[str] = None
+    packets: int | None = None
+    port: int | None = None
+    registered_domain: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
     # as.*
     # geo.*
-    user: Optional[User] = None
+    user: User | None = None
 
 
 @dataclass
 class Server(ECSEntry):
-    address: Optional[str] = None
-    bytes: Optional[int] = None
-    domain: Optional[str] = None
-    ip: Optional[str] = None
-    mac: Optional[str] = None
+    address: str | None = None
+    bytes: int | None = None
+    domain: str | None = None
+    ip: str | None = None
+    mac: str | None = None
     # nat.*
-    packets: Optional[int] = None
-    port: Optional[int] = None
-    registered_domain: Optional[str] = None
-    subdomain: Optional[str] = None
-    top_level_domain: Optional[str] = None
+    packets: int | None = None
+    port: int | None = None
+    registered_domain: str | None = None
+    subdomain: str | None = None
+    top_level_domain: str | None = None
     # as.*
     # geo.*
-    user: Optional[User] = None
+    user: User | None = None
 
 
 @dataclass
 class Base(ECSEntry):
-    client: Optional[Client] = None
-    error: Optional[Error] = None
-    event: Optional[Event] = None
-    destination: Optional[Destination] = None
-    group: Optional[Group] = None
-    host: Optional[Host] = None
-    http: Optional[Http] = None
-    log: Optional[Log] = None
-    network: Optional[Network] = None
-    process: Optional[Process] = None
-    server: Optional[Server] = None
-    source: Optional[Source] = None
-    url: Optional[URL] = None
-    user: Optional[User] = None
-    user_agent: Optional[UserAgent] = None
-    message: Optional[str] = None
+    client: Client | None = None
+    error: Error | None = None
+    event: Event | None = None
+    destination: Destination | None = None
+    group: Group | None = None
+    host: Host | None = None
+    http: Http | None = None
+    log: Log | None = None
+    network: Network | None = None
+    process: Process | None = None
+    server: Server | None = None
+    source: Source | None = None
+    url: URL | None = None
+    user: User | None = None
+    user_agent: UserAgent | None = None
+    message: str | None = None
