@@ -63,20 +63,31 @@ class ECSEntry(ABC):
         for field in fields(self):
             field_value = getattr(self, field.name)
 
+            # Override for reserved field names.
+            dict_field_name: str
+            match field.name:
+                case 'class_':
+                    dict_field_name = 'class'
+                case _:
+                    dict_field_name = field.name
+
             if isinstance(field_value, ECSEntry):
                 if field_value_dict := field_value.to_dict():
                     entry_dict[field.name] = field_value_dict
             else:
                 if field_value is not None:
-                    # NOTE: Override for reserved field names.
-                    dict_field_name: str
-                    match field.name:
-                        case 'class_':
-                            dict_field_name = 'class'
-                        case _:
-                            dict_field_name = field.name
+                    if isinstance(field_value, list):
+                        dict_field_value = []
+                        for element in field_value:
+                            if isinstance(element, ECSEntry):
+                                if element_dict := element.to_dict():
+                                    dict_field_value.append(element_dict)
+                            else:
+                                dict_field_value.append(element)
+                    else:
+                        dict_field_value = field_value
 
-                    entry_dict[dict_field_name] = field_value
+                    entry_dict[dict_field_name] = dict_field_value
 
         return entry_dict
 
