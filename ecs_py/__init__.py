@@ -478,6 +478,7 @@ class Base(ECSEntry):
     error: Error | None = None
     event: Event | None = None
     destination: Destination | None = None
+    dns: DNS | None = None
     group: Group | None = None
     host: Host | None = None
     http: Http | None = None
