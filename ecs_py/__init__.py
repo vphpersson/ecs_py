@@ -144,6 +144,17 @@ class OS(ECSEntry):
 
 
 @dataclass
+class Hash(ECSEntry):
+    md5: str | None = None
+    sha1: str | None = None
+    sha256: str | None = None
+    sha384: str | None = None
+    sha512: str | None = None
+    ssdeep: str | None = None
+    tlsh: str | None = None
+
+
+@dataclass
 class Host(ECSEntry):
     architecture: str | None = None
     # cpu.*
@@ -484,6 +495,48 @@ class Server(ECSEntry):
 
 
 @dataclass
+class TLSClient(ECSEntry):
+    certificate: str | None = None
+    certificate_chain: list[str] | None = None
+    hash: Hash | None = None
+    issuer: str | None = None
+    ja3: str | None = None
+    not_after: str | None = None
+    not_before: str | None = None
+    server_name: str | None = None
+    subject: str | None = None
+    supported_ciphers: list[str] | None = None
+
+
+@dataclass
+class TLSServer(ECSEntry):
+    certificate: str | None = None
+    certificate_chain: list[str] | None = None
+    hash: Hash | None = None
+    issuer: str | None = None
+    ja3s: str | None = None
+    not_after: str | None = None
+    not_before: str | None = None
+    server_name: str | None = None
+    subject: str | None = None
+    supported_ciphers: list[str] | None = None
+
+
+@dataclass
+class TLS(ECSEntry):
+    cipher: str | None = None
+    client: TLSClient | None = None
+    curve: str | None = None
+    established: bool | None = None
+    # TODO: Should be a list?
+    next_protocol: str | None = None
+    resumed: bool | None = None
+    server: TLSServer | None = None
+    version: str | None = None
+    version_protocol: str | None = None
+
+
+@dataclass
 class Base(ECSEntry):
     client: Client | None = None
     error: Error | None = None
@@ -498,6 +551,7 @@ class Base(ECSEntry):
     process: Process | None = None
     server: Server | None = None
     source: Source | None = None
+    tls: TLS | None = None
     url: URL | None = None
     user: User | None = None
     user_agent: UserAgent | None = None
