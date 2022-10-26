@@ -517,9 +517,7 @@ class TLSServer(ECSEntry):
     ja3s: str | None = None
     not_after: str | None = None
     not_before: str | None = None
-    server_name: str | None = None
     subject: str | None = None
-    supported_ciphers: list[str] | None = None
 
 
 @dataclass
