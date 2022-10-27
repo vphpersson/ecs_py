@@ -338,7 +338,6 @@ class Destination(ECSEntry):
     # geo.*
     user: User | None = None
 
-
 @dataclass
 class SourceNat(ECSEntry):
     ip: str | None = None
@@ -534,6 +533,18 @@ class TLS(ECSEntry):
     version_protocol: str | None = None
 
 
+# NOTE: Not part of ECS.
+@dataclass
+class ICMP(ECSEntry):
+    version: str | None = None
+    type: int | None = None
+    type_str: str | None = None
+    code: int | None = None
+    code_str: str | None = None
+    transport: str | None = None
+    application: str | None = None
+
+
 @dataclass
 class Base(ECSEntry):
     client: Client | None = None
@@ -544,6 +555,7 @@ class Base(ECSEntry):
     group: Group | None = None
     host: Host | None = None
     http: Http | None = None
+    icmp: ICMP | None = None
     log: Log | None = None
     network: Network | None = None
     process: Process | None = None
