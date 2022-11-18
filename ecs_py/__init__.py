@@ -8,7 +8,7 @@ from abc import ABC
 from re import compile as re_compile, Pattern as RePattern
 
 
-_OPTIONAL_TYPE_PATTERN: Final[RePattern] = re_compile(pattern=r'^Optional\[([^]]+)\]$')
+_OPTIONAL_TYPE_PATTERN: Final[RePattern] = re_compile(pattern=r'^([^ |]+)\s*\|\s*None$')
 
 
 @dataclass
