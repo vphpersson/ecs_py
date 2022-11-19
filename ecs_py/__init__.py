@@ -9,6 +9,7 @@ from abc import ABC
 from re import compile as re_compile, Pattern as RePattern
 from warnings import warn
 from json import dumps as json_dumps
+from copy import deepcopy
 
 _OPTIONAL_TYPE_PATTERN: Final[RePattern] = re_compile(pattern=r'^([^ |]+)\s*\|\s*None$')
 
@@ -64,7 +65,29 @@ class ECSEntry(ABC):
         else:
             return field_value
 
-    def __dict__(self) -> dict[str, Any]:
+    @staticmethod
+    def _merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
+
+        if (a_type := type(a)) is not (b_type := type(b)):
+            raise TypeError(f'The ECS entry types are not the same: "{a_type}", "{b_type}"')
+
+        b_key_value_pairs = tuple((field.name, getattr(b, field.name)) for field in fields(b))
+
+        for key, b_value in b_key_value_pairs:
+            if isinstance(a_value := getattr(a, key, None), ECSEntry) and isinstance(b_value, ECSEntry):
+                ECSEntry._merge(a_value, b_value)
+            elif b_value is not None:
+                setattr(a, key, b_value)
+
+        return a
+
+    def _to_dict(self) -> dict[str, Any]:
+        """
+        Produce a `dict` from the ECS entry, removing fields with `None` as value.
+
+        :return: A `dict` representation of ECS entry.
+        """
+
         entry_dict: dict[str, Any] = dict()
 
         for field in fields(self):
@@ -79,7 +102,7 @@ class ECSEntry(ABC):
                     dict_field_name = field.name
 
             if isinstance(field_value, ECSEntry):
-                if field_value_dict := field_value.to_dict():
+                if field_value_dict := field_value._to_dict():
                     entry_dict[field.name] = field_value_dict
             else:
                 if field_value is not None:
@@ -87,7 +110,7 @@ class ECSEntry(ABC):
                         dict_field_value = []
                         for element in field_value:
                             if isinstance(element, ECSEntry):
-                                if element_dict := element.to_dict():
+                                if element_dict := element._to_dict():
                                     dict_field_value.append(element_dict)
                             else:
                                 dict_field_value.append(element)
@@ -98,34 +121,6 @@ class ECSEntry(ABC):
 
         return entry_dict
 
-    def __iter__(self):
-        # NOTE: Is this actually the expected type of the returned values?
-        return iter(self.__dict__().items())
-
-    def __str__(self) -> str:
-        return json_dumps(self.__dict__(), default=_json_dumps_default)
-
-    def __ior__(self, other):
-        if not isinstance(other, ECSEntry):
-            raise NotImplemented(f'__ior__ is not implemented for types other than {self.__class__.__name__}.')
-
-        def merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
-
-            if (a_type := type(a)) is not (b_type := type(b)):
-                raise TypeError(f'The ECS entry types are not the same: "{a_type}", "{b_type}"')
-
-            b_key_value_pairs = tuple((field.name, getattr(b, field.name)) for field in fields(b))
-
-            for key, b_value in b_key_value_pairs:
-                if isinstance(a_value := getattr(a, key, None), ECSEntry) and isinstance(b_value, ECSEntry):
-                    merge(a_value, b_value)
-                elif b_value is not None:
-                    setattr(a, key, b_value)
-
-            return a
-
-        return merge(self, other)
-
     def to_dict(self) -> dict[str, Any]:
         """
         Produce a `dict` from the ECS entry, removing fields with `None` as value.
@@ -133,8 +128,34 @@ class ECSEntry(ABC):
         :return: A `dict` representation of ECS entry.
         """
 
-        warn('To be deprecated. Use `__dict__` instead.', PendingDeprecationWarning)
-        return self.__dict__()
+        warn('To be deprecated. Use `dict()` instead.', PendingDeprecationWarning)
+        return self._to_dict()
+
+    def __iter__(self):
+        # NOTE: Is this actually the expected type of the returned values?
+        return iter(self._to_dict().items())
+
+    def __len__(self) -> int:
+        return sum(
+            bool(getattr(self, field.name))
+            for field in fields(self)
+        )
+
+    def __str__(self) -> str:
+        return json_dumps(self._to_dict(), default=_json_dumps_default)
+
+    def __or__(self, other: ECSEntry) -> ECSEntry:
+        if not isinstance(other, ECSEntry):
+            raise NotImplemented(f'__or__ is not implemented for types other than {self.__class__.__name__}.')
+
+        new: ECSEntry = deepcopy(self)
+        return self._merge(a=new, b=other)
+
+    def __ior__(self, other: ECSEntry) -> ECSEntry:
+        if not isinstance(other, ECSEntry):
+            raise NotImplemented(f'__ior__ is not implemented for types other than {self.__class__.__name__}.')
+
+        return self._merge(a=self, b=other)
 
 
 @dataclass
