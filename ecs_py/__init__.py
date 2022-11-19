@@ -99,10 +99,32 @@ class ECSEntry(ABC):
         return entry_dict
 
     def __iter__(self):
+        # NOTE: Is this actually the expected type of the returned values?
         return iter(self.__dict__().items())
 
     def __str__(self) -> str:
         return json_dumps(self.__dict__(), default=_json_dumps_default)
+
+    def __ior__(self, other):
+        if not isinstance(other, ECSEntry):
+            raise NotImplemented(f'__ior__ is not implemented for types other than {self.__class__.__name__}.')
+
+        def merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
+
+            if (a_type := type(a)) is not (b_type := type(b)):
+                raise TypeError(f'The ECS entry types are not the same: "{a_type}", "{b_type}"')
+
+            b_key_value_pairs = tuple((field.name, getattr(b, field.name)) for field in fields(b))
+
+            for key, b_value in b_key_value_pairs:
+                if isinstance(a_value := getattr(a, key, None), ECSEntry) and isinstance(b_value, ECSEntry):
+                    merge(a_value, b_value)
+                elif b_value is not None:
+                    setattr(a, key, b_value)
+
+            return a
+
+        return merge(self, other)
 
     def to_dict(self) -> dict[str, Any]:
         """
