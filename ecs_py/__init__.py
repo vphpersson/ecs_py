@@ -1,4 +1,5 @@
 from __future__ import annotations
+# TODO: No need for `annotations` in 3.11? Use `typing.Self` instead? Also no use for `_OPTIONAL_TYPE_PATTERN` then?
 from dataclasses import dataclass, fields
 from typing import Literal, Any, Final
 from shlex import join as shlex_join
@@ -6,9 +7,21 @@ from pathlib import PurePath
 from datetime import datetime
 from abc import ABC
 from re import compile as re_compile, Pattern as RePattern
-
+from warnings import warn
+from json import dumps as json_dumps
 
 _OPTIONAL_TYPE_PATTERN: Final[RePattern] = re_compile(pattern=r'^([^ |]+)\s*\|\s*None$')
+
+
+def _json_dumps_default(obj: Any):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, bytes):
+        return obj.decode()
+    elif isinstance(obj, memoryview):
+        return obj.tobytes().decode()
+
+    raise TypeError(f'Unexpected dumps type: {type(obj)}')
 
 
 @dataclass
@@ -51,13 +64,7 @@ class ECSEntry(ABC):
         else:
             return field_value
 
-    def to_dict(self) -> dict[str, Any]:
-        """
-        Produce a `dict` from the ECS entry, removing fields with `None` as value.
-
-        :return: A `dict` representation of ECS entry.
-        """
-
+    def __dict__(self) -> dict[str, Any]:
         entry_dict: dict[str, Any] = dict()
 
         for field in fields(self):
@@ -90,6 +97,22 @@ class ECSEntry(ABC):
                     entry_dict[dict_field_name] = dict_field_value
 
         return entry_dict
+
+    def __iter__(self):
+        return iter(self.__dict__().items())
+
+    def __str__(self) -> str:
+        return json_dumps(self.__dict__(), default=_json_dumps_default)
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Produce a `dict` from the ECS entry, removing fields with `None` as value.
+
+        :return: A `dict` representation of ECS entry.
+        """
+
+        warn('To be deprecated. Use `__dict__` instead.', PendingDeprecationWarning)
+        return self.__dict__()
 
 
 @dataclass
