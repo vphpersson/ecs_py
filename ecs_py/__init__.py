@@ -612,8 +612,108 @@ class ICMP(ECSEntry):
 
 
 @dataclass
+class AttachmentFile(ECSEntry):
+    extension: str | None = None
+    mime_type: str | None = None
+    name: str | None = None
+    size: int | None = None
+
+
+@dataclass
+class Attachment(ECSEntry):
+    file: AttachmentFile | None = None
+
+
+@dataclass
+class BCC(ECSEntry):
+    # NOTE: Custom.
+    name: list[str | None] | None = None
+    address: list[str] = None
+
+
+@dataclass
+class CC(ECSEntry):
+    # NOTE: Custom.
+    name: list[str | None] | None = None
+    address: list[str] = None
+
+
+@dataclass
+class From(ECSEntry):
+    # NOTE: Custom.
+    name: list[str | None] | None = None
+    address: list[str] | None = None
+
+
+@dataclass
+class ReplyTo(ECSEntry):
+    # NOTE: Custom.
+    name: list[str | None] | None = None
+    address: list[str | None] | None = None
+
+
+@dataclass
+class Sender(ECSEntry):
+    # NOTE: Custom.
+    name: str | None = None
+    address: str | None = None
+    # NOTE: Custom
+    original: str | None = None
+
+
+@dataclass
+class To(ECSEntry):
+    # NOTE: Custom.
+    name: list[str | None] | None = None
+    address: list[str] | None = None
+
+
+# NOTE: Custom
+@dataclass
+class RcptTo(ECSEntry):
+    name: str | None = None
+    address: str | None = None
+    original: str | None = None
+
+
+# NOTE: Custom
+@dataclass
+class SMTP(ECSEntry):
+    ehlo: str | None = None
+    rcpt_to: RcptTo | None = None
+
+
+@dataclass
+class Email(ECSEntry):
+    attachments: list[Attachment] | None = None
+    bcc: BCC | None = None
+    cc: CC | None = None
+    content_type: str | None = None
+    delivery_timestamp: datetime | None = None
+    direction: str | None = None
+    from_: From | None = None
+    local_id: str | None = None
+    message_id: str | None = None
+    origination_timestamp: datetime | None = None
+    reply_to: ReplyTo | None = None
+    sender: Sender | None = None
+    # NOTE: Custom
+    smtp: SMTP | None = None
+    subject: str | None = None
+    to: To | None = None
+    # NOTE: Custom
+    headers: dict[str, list[str]] | None = None
+    x_mailer: str | None = None
+    # NOTE: Custom
+    x_original_ip: str | None = None
+    # NOTE: Custom
+    x_user_agent: str | None = None
+
+
+@dataclass
 class Base(ECSEntry):
     client: Client | None = None
+    email: Email | None = None
     error: Error | None = None
     event: Event | None = None
     destination: Destination | None = None
