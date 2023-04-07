@@ -612,7 +612,7 @@ class ICMP(ECSEntry):
 
 
 @dataclass
-class AttachmentFile(ECSEntry):
+class EmailAttachmentFile(ECSEntry):
     extension: str | None = None
     hash: Hash | None = None
     mime_type: str | None = None
@@ -621,8 +621,8 @@ class AttachmentFile(ECSEntry):
 
 
 @dataclass
-class Attachment(ECSEntry):
-    file: AttachmentFile | None = None
+class EmailAttachment(ECSEntry):
+    file: EmailAttachmentFile | None = None
 
 
 @dataclass
@@ -686,7 +686,7 @@ class SMTP(ECSEntry):
 
 @dataclass
 class Email(ECSEntry):
-    attachments: list[Attachment] | None = None
+    attachments: list[EmailAttachment] | None = None
     bcc: BCC | None = None
     cc: CC | None = None
     content_type: str | None = None
