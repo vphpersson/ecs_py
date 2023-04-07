@@ -614,6 +614,7 @@ class ICMP(ECSEntry):
 @dataclass
 class AttachmentFile(ECSEntry):
     extension: str | None = None
+    hash: Hash | None = None
     mime_type: str | None = None
     name: str | None = None
     size: int | None = None
