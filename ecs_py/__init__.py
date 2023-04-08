@@ -613,6 +613,7 @@ class ICMP(ECSEntry):
 
 @dataclass
 class EmailAttachmentFile(ECSEntry):
+    # NOTE: Custom.
     content: str | None = None
     extension: str | None = None
     hash: Hash | None = None
