@@ -685,7 +685,7 @@ class SMTP(ECSEntry):
 
 
 @dataclass
-class EmailBody:
+class EmailBody(ECSEntry):
     content_type: str | None = None
     content: str | None = None
     size: int | None = None
