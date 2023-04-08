@@ -704,17 +704,19 @@ class Email(ECSEntry):
     delivery_timestamp: datetime | None = None
     direction: str | None = None
     from_: From | None = None
+    # NOTE: Custom
+    headers: dict[str, list[str]] | None = None
     local_id: str | None = None
     message_id: str | None = None
     origination_timestamp: datetime | None = None
+    # NOTE: Custom
+    raw_headers: str | None = None
     reply_to: ReplyTo | None = None
     sender: Sender | None = None
     # NOTE: Custom
     smtp: SMTP | None = None
     subject: str | None = None
     to: To | None = None
-    # NOTE: Custom
-    headers: dict[str, list[str]] | None = None
     x_mailer: str | None = None
     # NOTE: Custom
     x_original_ip: str | None = None
