@@ -685,8 +685,17 @@ class SMTP(ECSEntry):
 
 
 @dataclass
+class EmailBody:
+    content_type: str | None = None
+    content: str | None = None
+    size: int | None = None
+
+
+@dataclass
 class Email(ECSEntry):
     attachments: list[EmailAttachment] | None = None
+    # NOTE: Custom
+    bodies: list[EmailBody] | None = None
     bcc: BCC | None = None
     cc: CC | None = None
     content_type: str | None = None
