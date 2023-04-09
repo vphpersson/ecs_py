@@ -685,6 +685,7 @@ class RcptTo(ECSEntry):
 @dataclass
 class SMTP(ECSEntry):
     ehlo: str | None = None
+    mail_from: str | None = None
     rcpt_to: RcptTo | None = None
 
 
