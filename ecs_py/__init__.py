@@ -674,25 +674,10 @@ class To(ECSEntry):
 
 # NOTE: Custom
 @dataclass
-class MailFrom(ECSEntry):
-    name: str | None = None
-    address: str | None = None
-    original: str | None = None
-
-# NOTE: Custom
-@dataclass
-class RcptTo(ECSEntry):
-    name: str | None = None
-    address: str | None = None
-    original: str | None = None
-
-
-# NOTE: Custom
-@dataclass
 class SMTP(ECSEntry):
     ehlo: str | None = None
-    mail_from: MailFrom | None = None
-    rcpt_to: RcptTo | None = None
+    mail_from: str | None = None
+    rcpt_to: str | None = None
 
 
 @dataclass
