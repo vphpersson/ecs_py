@@ -659,11 +659,7 @@ class ReplyTo(ECSEntry):
 
 @dataclass
 class Sender(ECSEntry):
-    # NOTE: Custom.
-    name: str | None = None
     address: str | None = None
-    # NOTE: Custom
-    original: str | None = None
 
 
 @dataclass
