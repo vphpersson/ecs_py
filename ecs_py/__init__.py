@@ -98,6 +98,8 @@ class ECSEntry(ABC):
             match field.name:
                 case 'class_':
                     dict_field_name = 'class'
+                case 'from_':
+                    dict_field_name = 'from'
                 case _:
                     dict_field_name = field.name
 
@@ -713,8 +715,6 @@ class Email(ECSEntry):
     raw_headers: str | None = None
     reply_to: ReplyTo | None = None
     sender: Sender | None = None
-    # NOTE: Custom
-    smtp: SMTP | None = None
     subject: str | None = None
     to: To | None = None
     x_mailer: str | None = None
@@ -735,11 +735,14 @@ class Base(ECSEntry):
     group: Group | None = None
     host: Host | None = None
     http: Http | None = None
+    # NOTE: Custom.
     icmp: ICMP | None = None
     log: Log | None = None
     network: Network | None = None
     process: Process | None = None
     server: Server | None = None
+    # NOTE Custom.
+    smtp: SMTP | None = None
     source: Source | None = None
     tls: TLS | None = None
     url: URL | None = None
