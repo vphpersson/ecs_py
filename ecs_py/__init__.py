@@ -713,6 +713,14 @@ class Email(ECSEntry):
 
 
 @dataclass
+class Related(ECSEntry):
+    hash: list[str] | None = None
+    hosts: list[str] | None = None
+    ip: list[str] | None = None
+    user: list[str] | None = None
+
+
+@dataclass
 class Base(ECSEntry):
     client: Client | None = None
     email: Email | None = None
@@ -728,6 +736,7 @@ class Base(ECSEntry):
     log: Log | None = None
     network: Network | None = None
     process: Process | None = None
+    related: Related | None = None
     server: Server | None = None
     # NOTE Custom.
     smtp: SMTP | None = None
