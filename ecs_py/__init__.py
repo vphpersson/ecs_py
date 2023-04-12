@@ -668,12 +668,22 @@ class To(ECSEntry):
     name: list[str | None] | None = None
     address: list[str] | None = None
 
+# NOTE: Custom
+@dataclass
+class SMTPEnhancedStatusCode(ECSEntry):
+    class_: str | None = None
+    class_text: str | None = None
+    subject: str | None = None
+    subject_text: str | None = None
+    detail: str | None = None
+    detail_text: str | None = None
+    original: str | None = None
 
 # NOTE: Custom
 @dataclass
 class SMTPResponse(ECSEntry):
     status_code: str | None = None
-    enhanced_status_code: str | None = None
+    enhanced_status_code: SMTPEnhancedStatusCode | None = None
     lines: list[str] | None = None
 
 
