@@ -753,6 +753,12 @@ class Email(ECSEntry):
     x_user_agent: str | None = None
 
 
+# NOTE: Custom.
+@dataclass
+class TCP(ECSEntry):
+    flags: list[str] | None = None
+
+
 @dataclass
 class Related(ECSEntry):
     hash: list[str] | None = None
@@ -782,6 +788,8 @@ class Base(ECSEntry):
     # NOTE Custom.
     smtp: SMTP | None = None
     source: Source | None = None
+    # NOTE: Custom
+    tcp: TCP | None = None
     tls: TLS | None = None
     url: URL | None = None
     user: User | None = None
