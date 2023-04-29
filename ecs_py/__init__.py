@@ -757,6 +757,8 @@ class Email(ECSEntry):
 @dataclass
 class TCP(ECSEntry):
     flags: list[str] | None = None
+    acknowledgement_number: int | None = None
+    sequence_number: int | None = None
 
 
 @dataclass
