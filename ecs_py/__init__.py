@@ -568,6 +568,8 @@ class TLSClient(ECSEntry):
     hash: Hash | None = None
     issuer: str | None = None
     ja3: str | None = None
+    # NOTE: Custom.
+    ja3_full: str | None = None
     not_after: str | None = None
     not_before: str | None = None
     server_name: str | None = None
