@@ -167,6 +167,8 @@ class Error(ECSEntry):
     id: str | None = None
     stack_trace: str | None = None
     type: str | None = None
+    # NOTE: Custom
+    input: str | None = None
 
 
 @dataclass
