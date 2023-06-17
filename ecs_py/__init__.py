@@ -105,7 +105,7 @@ class ECSEntry(ABC):
 
             if isinstance(field_value, ECSEntry):
                 if field_value_dict := field_value._to_dict():
-                    entry_dict[field.name] = field_value_dict
+                    entry_dict[dict_field_name] = field_value_dict
             else:
                 if field_value is not None:
                     if isinstance(field_value, list):
