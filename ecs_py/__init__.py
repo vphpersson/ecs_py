@@ -371,6 +371,8 @@ class LogOriginFile(ECSEntry):
 class LogOrigin(ECSEntry):
     file: LogOriginFile | None = None
     function: str | None = None
+    # NOTE: Custom
+    process: Process | None = None
 
 
 @dataclass
@@ -383,8 +385,6 @@ class Log(ECSEntry):
     level: str | None = None
     logger: str | None = None
     origin: LogOrigin | None = None
-    # NOTE: Custom
-    process: Process | None = None
 
 
 @dataclass
