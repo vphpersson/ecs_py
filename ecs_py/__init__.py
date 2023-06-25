@@ -383,6 +383,8 @@ class Log(ECSEntry):
     level: str | None = None
     logger: str | None = None
     origin: LogOrigin | None = None
+    # NOTE: Custom
+    process: Process | None = None
 
 
 @dataclass
