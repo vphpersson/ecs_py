@@ -574,6 +574,16 @@ class TLSClient(ECSEntry):
     ja3: str | None = None
     # NOTE: Custom.
     ja3_full: str | None = None
+    # NOTE: Custom
+    ja3_ssl_version: str | None = None
+    # NOTE: Custom
+    ja3_cipher: str | None = None
+    # NOTE: Custom
+    ja3_ssl_extension: str | None = None
+    # NOTE: Custom
+    ja3_elliptic_curve: str | None = None
+    # NOTE: Custom
+    ja3_elliptic_curve_point_format: str | None = None
     not_after: str | None = None
     not_before: str | None = None
     server_name: str | None = None
