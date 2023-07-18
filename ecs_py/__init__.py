@@ -786,6 +786,20 @@ class Related(ECSEntry):
 
 
 @dataclass
+class Rule(ECSEntry):
+    author: str | None = None
+    category: str | None = None
+    description: str | None = None
+    id: str | None = None
+    license: str | None = None
+    name: str | None = None
+    reference: str | None = None
+    ruleset: str | None = None
+    uuid: str | None = None
+    version: str | None = None
+
+
+@dataclass
 class Base(ECSEntry):
     client: Client | None = None
     email: Email | None = None
@@ -802,6 +816,7 @@ class Base(ECSEntry):
     network: Network | None = None
     process: Process | None = None
     related: Related | None = None
+    rule: Rule | None = None
     server: Server | None = None
     # NOTE Custom.
     smtp: SMTP | None = None
