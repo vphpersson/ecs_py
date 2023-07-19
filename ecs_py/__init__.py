@@ -1,7 +1,6 @@
 from __future__ import annotations
-# TODO: No need for `annotations` in 3.11? Use `typing.Self` instead? Also no use for `_OPTIONAL_TYPE_PATTERN` then?
 from dataclasses import dataclass, fields
-from typing import Literal, Any, Final
+from typing import Literal, Any, Final, Self
 from shlex import join as shlex_join
 from pathlib import PurePath
 from datetime import datetime
@@ -28,6 +27,74 @@ def _json_dumps_default(obj: Any):
 @dataclass
 class ECSEntry(ABC):
 
+    def _get_namespace(self, field_name: str, create_namespaces: bool = False) -> Self:
+        if not field_name:
+            return self
+        elif '.' in field_name:
+            current_field_name, remaining_field_name = field_name.split(sep='.', maxsplit=1)
+        else:
+            current_field_name = field_name
+            remaining_field_name = ''
+
+        if (field_value := getattr(self, current_field_name)) is None:
+            if create_namespaces:
+                field_type = globals()[_OPTIONAL_TYPE_PATTERN.sub(repl=r'\1', string=self.__annotations__[current_field_name])]
+                if issubclass(field_type, ECSEntry):
+                    created_namespace: ECSEntry = field_type()
+                    setattr(self, current_field_name, created_namespace)
+                    return created_namespace._get_namespace(
+                        field_name=remaining_field_name,
+                        create_namespaces=create_namespaces
+                    )
+                else:
+                    raise ValueError(
+                        'A namespace cannot be created for the field name because a non-namespace type is reached: '
+                        f'{field_name}'
+                    )
+            else:
+                raise ValueError(f'A namespace cannot be resolved because a None is reached: {field_name}')
+        elif isinstance(field_value, ECSEntry):
+            return field_value._get_namespace(field_name=remaining_field_name)
+        else:
+            raise ValueError(
+                'A namespace cannot be resolved because a non-namespace type is reached: '
+                f'{field_name}'
+            )
+
+    def _get_namespace_and_field(self, field_name: str, create_namespaces: bool = False) -> tuple[Self, str]:
+        if not field_name:
+            raise ValueError('No field name provided.')
+
+        namespace_selector: str
+        last_field_name_list: list[str]
+        namespace_selector, *last_field_name_list = field_name.rsplit(sep='.', maxsplit=1)
+
+        namespace = self._get_namespace(field_name=namespace_selector, create_namespaces=create_namespaces)
+        last_field_name = next(iter(last_field_name_list), namespace_selector)
+
+        return namespace, last_field_name
+
+    def set_field_value(self, field_name: str, value: Any, create_namespaces: bool = False) -> None:
+        """
+        Set a field name to a value.
+
+        :param field_name: The field name to be set.
+        :param value: The value to set.
+        :param create_namespaces: Whether to create the namespace that does not already exist when resolving the field
+            name.
+        :return: None.
+        """
+
+        namespace, last_field_name = self._get_namespace_and_field(
+            field_name=field_name,
+            create_namespaces=create_namespaces
+        )
+
+        if not hasattr(namespace, last_field_name):
+            raise ValueError(f'The namespace does not have the attribute {last_field_name}')
+
+        setattr(namespace, last_field_name, value)
+
     def get_field_value(self, field_name: str, create_namespaces: bool = False) -> Any:
         """
         Retrieve the value corresponding to the provided field name.
@@ -38,48 +105,12 @@ class ECSEntry(ABC):
         :return: The value corresponding to the provided field name.
         """
 
-        if '.' in field_name:
-            current_field_name, remaining_field_name = field_name.split(sep='.', maxsplit=1)
-        else:
-            current_field_name = field_name
-            remaining_field_name = ''
+        namespace, last_field_name = self._get_namespace_and_field(
+            field_name=field_name,
+            create_namespaces=create_namespaces
+        )
 
-        if not hasattr(self, current_field_name):
-            raise ValueError(f'{self} does not have the field "{current_field_name}"')
-
-        if (field_value := getattr(self, current_field_name)) is None:
-            field_type = globals()[_OPTIONAL_TYPE_PATTERN.sub(repl=r'\1', string=self.__annotations__[current_field_name])]
-
-            if issubclass(field_type, ECSEntry) and create_namespaces:
-                created_namespace = field_type()
-                setattr(self, current_field_name, created_namespace)
-
-                return (
-                    created_namespace.get_field_value(field_name=remaining_field_name)
-                    if remaining_field_name else created_namespace
-                )
-            else:
-                return None
-        elif isinstance(field_value, ECSEntry) and remaining_field_name != '':
-            return field_value.get_field_value(field_name=remaining_field_name)
-        else:
-            return field_value
-
-    @staticmethod
-    def _merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
-
-        if (a_type := type(a)) is not (b_type := type(b)):
-            raise TypeError(f'The ECS entry types are not the same: "{a_type}", "{b_type}"')
-
-        b_key_value_pairs = tuple((field.name, getattr(b, field.name)) for field in fields(b))
-
-        for key, b_value in b_key_value_pairs:
-            if isinstance(a_value := getattr(a, key, None), ECSEntry) and isinstance(b_value, ECSEntry):
-                ECSEntry._merge(a_value, b_value)
-            elif b_value is not None:
-                setattr(a, key, b_value)
-
-        return a
+        return getattr(namespace, last_field_name)
 
     def _to_dict(self) -> dict[str, Any]:
         """
@@ -93,15 +124,7 @@ class ECSEntry(ABC):
         for field in fields(self):
             field_value = getattr(self, field.name)
 
-            # Override for reserved field names.
-            dict_field_name: str
-            match field.name:
-                case 'class_':
-                    dict_field_name = 'class'
-                case 'from_':
-                    dict_field_name = 'from'
-                case _:
-                    dict_field_name = field.name
+            dict_field_name: str = field.name.rstrip('_')
 
             if isinstance(field_value, ECSEntry):
                 if field_value_dict := field_value._to_dict():
@@ -146,18 +169,34 @@ class ECSEntry(ABC):
     def __str__(self) -> str:
         return json_dumps(self._to_dict(), default=_json_dumps_default)
 
-    def __or__(self, other: ECSEntry) -> ECSEntry:
+    def __or__(self, other: Self) -> Self:
         if not isinstance(other, ECSEntry):
             raise NotImplemented(f'__or__ is not implemented for types other than {self.__class__.__name__}.')
 
         new: ECSEntry = deepcopy(self)
-        return self._merge(a=new, b=other)
+        return _merge(a=new, b=other)
 
-    def __ior__(self, other: ECSEntry) -> ECSEntry:
+    def __ior__(self, other: Self) -> Self:
         if not isinstance(other, ECSEntry):
             raise NotImplemented(f'__ior__ is not implemented for types other than {self.__class__.__name__}.')
 
-        return self._merge(a=self, b=other)
+        return _merge(a=self, b=other)
+
+
+def _merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
+
+    if (a_type := type(a)) is not (b_type := type(b)):
+        raise TypeError(f'The ECS entry types are not the same: "{a_type}", "{b_type}"')
+
+    b_key_value_pairs = tuple((field.name, getattr(b, field.name)) for field in fields(b))
+
+    for key, b_value in b_key_value_pairs:
+        if isinstance(a_value := getattr(a, key, None), ECSEntry) and isinstance(b_value, ECSEntry):
+            _merge(a_value, b_value)
+        elif b_value is not None:
+            setattr(a, key, b_value)
+
+    return a
 
 
 @dataclass
