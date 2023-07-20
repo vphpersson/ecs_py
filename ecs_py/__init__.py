@@ -54,7 +54,7 @@ class ECSEntry(ABC):
             else:
                 raise ValueError(f'A namespace cannot be resolved because a None is reached: {field_name}')
         elif isinstance(field_value, ECSEntry):
-            return field_value._get_namespace(field_name=remaining_field_name)
+            return field_value._get_namespace(field_name=remaining_field_name, create_namespaces=create_namespaces)
         else:
             raise ValueError(
                 'A namespace cannot be resolved because a non-namespace type is reached: '
