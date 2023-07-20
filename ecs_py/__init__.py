@@ -74,7 +74,7 @@ class ECSEntry(ABC):
 
         return namespace, last_field_name
 
-    def set_field_value(self, field_name: str, value: Any, create_namespaces: bool = False) -> None:
+    def set_field_value(self, field_name: str, value: Any, create_namespaces: bool = True) -> None:
         """
         Set a field name to a value.
 
@@ -118,7 +118,7 @@ class ECSEntry(ABC):
 
         return getattr(namespace, last_field_name)
 
-    def assign(self, value_dict: dict[str, Any], create_namespaces: bool = False):
+    def assign(self, value_dict: dict[str, Any], create_namespaces: bool = True):
         for key, value in value_dict:
             self.set_field_value(field_name=key, value=value, create_namespaces=create_namespaces)
 
