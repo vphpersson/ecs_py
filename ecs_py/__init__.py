@@ -513,7 +513,7 @@ class HttpRequest(ECSEntry):
 class HttpResponse(ECSEntry):
     body: HttpBody | None = None
     # Custom
-    headers: dict[str, str | None] = None
+    headers: dict[str, str] | None = None
     bytes: int | None = None
     mime_type: str | None = None
     # Custom
@@ -670,7 +670,7 @@ class TLS(ECSEntry):
     version_protocol: str | None = None
 
 
-# NOTE: Not part of ECS.
+# NOTE: Custom.
 @dataclass
 class ICMP(ECSEntry):
     version: str | None = None
