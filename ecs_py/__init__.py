@@ -85,13 +85,17 @@ class ECSEntry(ABC):
         :return: None.
         """
 
-        namespace, last_field_name = self._get_namespace_and_field(
-            field_name=field_name,
-            create_namespaces=create_namespaces
-        )
+        if '.' in field_name:
+            namespace, last_field_name = self._get_namespace_and_field(
+                field_name=field_name,
+                create_namespaces=create_namespaces
+            )
 
-        if field_name == last_field_name:
+            if field_name == last_field_name:
+                namespace = self
+        else:
             namespace = self
+            last_field_name = field_name
 
         if not hasattr(namespace, last_field_name):
             raise ValueError(f'The namespace does not have the attribute {last_field_name}')
