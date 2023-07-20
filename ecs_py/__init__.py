@@ -90,6 +90,9 @@ class ECSEntry(ABC):
             create_namespaces=create_namespaces
         )
 
+        if field_name == last_field_name:
+            namespace = self
+
         if not hasattr(namespace, last_field_name):
             raise ValueError(f'The namespace does not have the attribute {last_field_name}')
 
@@ -109,6 +112,9 @@ class ECSEntry(ABC):
             field_name=field_name,
             create_namespaces=create_namespaces
         )
+
+        if field_name == last_field_name:
+            return namespace
 
         return getattr(namespace, last_field_name)
 
