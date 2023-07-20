@@ -118,6 +118,10 @@ class ECSEntry(ABC):
 
         return getattr(namespace, last_field_name)
 
+    def assign(self, value_dict: dict[str, Any], create_namespaces: bool = False):
+        for key, value in value_dict:
+            self.set_field_value(field_name=key, value=value, create_namespaces=create_namespaces)
+
     def _to_dict(self) -> dict[str, Any]:
         """
         Produce a `dict` from the ECS entry, removing fields with `None` as value.
