@@ -1,4 +1,4 @@
 [project]
 name = "ecs_py"
-version = "0.99"
+version = "1.00"
 dependencies = []

@@ -304,9 +304,12 @@ class Interface(ECSEntry):
 
 @dataclass
 class ObserverIngressEgress(ECSEntry):
+    # NOTE: Custom
+    hook: str | None = None
     interface: Interface | None = None
     # vlan.*
     zone: str | None = None
+
 
 
 @dataclass
