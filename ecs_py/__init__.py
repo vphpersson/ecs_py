@@ -296,6 +296,37 @@ class Host(ECSEntry):
 
 
 @dataclass
+class Interface(ECSEntry):
+    alias: str | None = None
+    id: str | None = None
+    name: str | None = None
+
+
+@dataclass
+class ObserverIngressEgress(ECSEntry):
+    interface: Interface | None = None
+    # vlan.*
+    zone: str | None = None
+
+
+@dataclass
+class Observer(ECSEntry):
+    egress: ObserverIngressEgress | None = None
+    # geo.*
+    hostname: str | None = None
+    ingress: ObserverIngressEgress | None = None
+    ip: str | None = None
+    mac: str | None = None
+    name: str | None = None
+    os: OS | None = None
+    product: str | None = None
+    serial_number: str | None = None
+    type: str | None = None
+    vendor: str | None = None
+    version: str | None = None
+
+
+@dataclass
 class ProcessThread(ECSEntry):
     id: int | None = None
     name: str | None = None
