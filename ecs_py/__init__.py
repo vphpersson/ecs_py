@@ -898,6 +898,7 @@ class Base(ECSEntry):
     icmp: ICMP | None = None
     log: Log | None = None
     network: Network | None = None
+    observer: Observer | None = None
     process: Process | None = None
     related: Related | None = None
     rule: Rule | None = None
