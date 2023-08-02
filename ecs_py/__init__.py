@@ -175,10 +175,7 @@ class ECSEntry(ABC):
         return iter(self._to_dict().items())
 
     def __len__(self) -> int:
-        return sum(
-            bool(getattr(self, field.name))
-            for field in fields(self)
-        )
+        return sum(bool(value is not None) for value in self.__dict__.values())
 
     def __str__(self) -> str:
         return json_dumps(self._to_dict(), default=_json_dumps_default)
@@ -195,6 +192,9 @@ class ECSEntry(ABC):
             raise NotImplemented(f'__ior__ is not implemented for types other than {self.__class__.__name__}.')
 
         return _merge(a=self, b=other)
+
+    def __bool__(self) -> bool:
+        return not all(value is None for value in self.__dict__.values())
 
 
 def _merge(a: ECSEntry, b: ECSEntry) -> ECSEntry:
